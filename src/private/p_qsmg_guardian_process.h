@@ -1,38 +1,15 @@
 #pragma once
 
 #include <QProcess>
-#include <QThread>
 #include <QTimer>
 #include <QMutex>
 #include <QDebug>
 #include <QFile>
 #include <QTime>
+#include "./p_qsmg_guardian_thread.h"
 
 namespace QSMG {
 
-class GuardianThread: public QThread
-{
-    Q_OBJECT
-public:
-    explicit GuardianThread():QThread(nullptr)
-    {
-        this->moveToThread(this);
-    }
-
-    void run() override
-    {
-        this->exec();
-    }
-
-    void start()
-    {
-        if(this->isRunning())
-            return;
-        QThread::start();
-        while(this->eventDispatcher()==nullptr)
-            QThread::msleep(1);
-    }
-};
 
 class GuardianProcess: public GuardianThread
 {
