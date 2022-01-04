@@ -1,4 +1,5 @@
 #include "./p_qsmg_item_limits.h"
+#include <QDateTime>
 
 namespace QSMG {
 
@@ -36,6 +37,9 @@ const QVariant ItemLimit::value() const
 
     if(this->name().contains(QStringLiteral("cpu")))
         return Util::Util::getCPU(__return);
+
+    if(this->name().contains(QStringLiteral("time")))
+        return Util::getInterval(__return);
 
     return {};
 }
@@ -77,8 +81,28 @@ bool ItemLimit::checkLimitExceeded(const QVariantHash &stats)
         if(this->name()!=key)
             continue;
 
-        const QVariant&valueCheck=i.value();
-        const QVariant valueLimit=this->value();
+        QVariant valueCheck=i.value();
+        QVariant valueLimit=this->value();
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        auto typeId=int(valueCheck.typeId());
+#else
+        auto typeId=int(valueCheck.type());
+#endif
+
+        if(key.contains(QStringLiteral("#time"))){
+            switch (typeId) {
+            case QMetaType::QDateTime:
+            {
+                auto dt=valueCheck.toDateTime();
+                valueCheck=QDateTime::currentDateTime().toMSecsSinceEpoch();
+                valueLimit=dt.addMSecs(valueLimit.toLongLong()).toMSecsSinceEpoch();
+                break;
+            }
+            default:
+                break;
+            }
+        }
 
         switch (stateCondition) {
         case Eq:

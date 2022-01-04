@@ -81,7 +81,7 @@ public:
     //! \param defaultV
     //! \return
     //!
-    static QVariant getMemoryBytes(const QVariant&v, const QVariant&defaultV=QVariant())
+    static const QVariant getMemoryBytes(const QVariant&v, const QVariant&defaultV=QVariant())
     {
         if(v.isNull() || !v.isValid() || v.toDouble()<0)
             return defaultV;
@@ -103,33 +103,33 @@ public:
         }
 
         qlonglong scale=1;
-        static qlonglong K=1024;
 
         auto a=getAlpha(v).toString().toLower();
         if(a==QStringLiteral("kb"))
             scale=1;
         else if(a==QStringLiteral("mb"))
-            scale=1000;
+            scale=2;
         else if(a==QStringLiteral("gb"))
-            scale=10000;
+            scale=3;
         else if(a==QStringLiteral("tb"))
-            scale=100000;
+            scale=4;
         else if(a==QStringLiteral("pb"))
-            scale=1000000;
+            scale=5;
         else if(a==QStringLiteral("eb"))
-            scale=10000000;
+            scale=6;
         else if(a==QStringLiteral("zb"))
-            scale=100000000;
+            scale=7;
         else if(a==QStringLiteral("yb"))
-            scale=1000000000;
+            scale=8;
         else
             scale=1;//ms
 
         auto iN=getNumber(v);
-        auto i=iN.toDouble();
-        i*=(K*scale);
+        auto i=iN.toLongLong();
+        i*=pow(1024, scale);
+        i/=1000;
         if(i<=0)
-            i=getMemoryBytes(defaultV).toULongLong();
+            i=getMemoryBytes(defaultV).toLongLong();
         return i;
     }
 
@@ -138,10 +138,62 @@ public:
     //! \param v
     //! \return
     //!
-    static QVariant getCPU(const QVariant&v)
+    static const QVariant getCPU(const QVariant&v)
     {
         auto __return=v.toString().replace(QStringLiteral("%"),"").toDouble();
         return __return;
+    }
+
+    //!
+    //! \brief getInterval
+    //! \param v
+    //! \param defaultV
+    //! \return
+    //!
+    static const QVariant getInterval(const QVariant&v, const QVariant&defaultV=QVariant())
+    {
+        if(v.isNull() || !v.isValid() || v.toDouble()<0)
+            return defaultV;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        auto typeId=int(v.typeId());
+#else
+        auto typeId=int(v.type());
+#endif
+        switch (typeId) {
+        case QMetaType::LongLong:
+        case QMetaType::ULongLong:
+        case QMetaType::Int:
+        case QMetaType::UInt:
+        case QMetaType::Double:
+            return v;
+        default:
+            break;
+        }
+
+        qlonglong scale=1;
+        auto a=getAlpha(v).toString().toLower();
+        if(a==QStringLiteral("s") || a==QStringLiteral("sc") || a==QStringLiteral("second"))
+            scale=1;
+        else if(a==QStringLiteral("m") || a==QStringLiteral("mn") || a==QStringLiteral("minute"))
+            scale=60;
+        else if(a==QStringLiteral("h") || a==QStringLiteral("hr") || a==QStringLiteral("hour"))
+            scale=60*60;
+        else if(a==QStringLiteral("d") || a==QStringLiteral("dd") || a==QStringLiteral("day"))
+            scale=60*60*24;
+        else if(a==QStringLiteral("mo")|| a==QStringLiteral("mo") || a==QStringLiteral("month"))
+            scale=(60*60*24*30);
+        else if(a==QStringLiteral("y") || a==QStringLiteral("yy") || a==QStringLiteral("year"))
+            scale=(60*60*12*365);
+        else
+            scale=1;//ms
+        scale*=1000;
+        auto iN=getNumber(v);
+        auto i=iN.toDouble();
+        i*=scale;
+        if(i<=0)
+            i=getInterval(defaultV).toLongLong();
+        return i;
     }
 };
 

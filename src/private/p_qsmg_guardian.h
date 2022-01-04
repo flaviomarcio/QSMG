@@ -69,6 +69,7 @@ public:
         this->limits=ItemLimitCollection(vLimits);
 
         GuardianThread::start();
+        QThread::sleep(1);
         return*this->parent;
     }
 public slots:
@@ -177,8 +178,10 @@ public slots:
         if(this->processStats!=nullptr && this->processStats->isActive())
             this->processStats->stop();
 
-        if(this->process!=nullptr && this->process->isRunning())
-            QTimer::singleShot(1, this->process, &GuardianProcess::onProcessTerminate);
+        if(this->process!=nullptr){
+            this->process->quit();
+        }
+        GuardianThread::quit();
     }
 
     void onProcessStatsCheck(const QVariantHash stats)

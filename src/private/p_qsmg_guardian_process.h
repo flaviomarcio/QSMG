@@ -39,6 +39,7 @@ class GuardianProcess: public GuardianThread
     Q_OBJECT
 public:
     QProcess*process=nullptr;
+    QDateTime started;
 
     explicit GuardianProcess():GuardianThread()
     {
@@ -53,6 +54,7 @@ public:
     void run() override
     {
         this->process=new QProcess(this);
+        this->started=QDateTime();
 
         //QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::errorOccurred)
 
@@ -102,6 +104,7 @@ public slots:
     {
         if(this->process==nullptr || !this->process->isOpen())
             return;
+        this->onProcessTerminate();
         Q_UNUSED(exitCode)
         Q_UNUSED(exitStatus)
     }
@@ -153,6 +156,8 @@ public slots:
         if(process==nullptr)
             return;
 
+        this->started=QDateTime();
+
         auto vRunner=settings.value(QByteArrayLiteral("runner")).toHash();
         auto vProgram=vRunner.value(QByteArrayLiteral("program")).toByteArray();
         auto vArguments=vRunner.value(QByteArrayLiteral("arguments")).toStringList();
@@ -160,6 +165,8 @@ public slots:
         process->start(vProgram, vArguments);
         if(!process->waitForStarted())
             this->onProcessTerminate();
+        else
+            started=QDateTime::currentDateTime();
     }
 
     void onProcessStats()
@@ -189,7 +196,7 @@ public slots:
         }
 
         QList<QByteArray> output;
-        if(!process.waitForFinished(3500)){
+        if(!process.waitForFinished(1500)){
             if(!process.isOpen()){
                 qWarning()<<process.readAllStandardError();
             }
@@ -235,7 +242,7 @@ public slots:
             if(columnDecimal.contains(key))
                 value=value.toDouble();
             if(columnTime.contains(key))
-                value=QTime::fromString(value.toString());
+                value=this->started;
             vResponse[key]=value;
         }
 
@@ -244,10 +251,9 @@ public slots:
 
     void onProcessTerminate()
     {
-        if(this->isRunning()){
-            emit processFinished();
+        if(this->isRunning())
             this->quit();
-        }
+        emit processFinished();
     }
 };
 
