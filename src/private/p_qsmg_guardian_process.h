@@ -81,48 +81,73 @@ signals:
     void processStandardOutput(const QByteArray output);
     void processStandardError(const QByteArray output);
 public slots:
+
+    //!
+    //! \brief qprocess_started
+    //!
+    //! slots task in QProcess
     void qprocess_started()
     {
         if(this->process==nullptr)
             return;
-        qDebug()<<__PRETTY_FUNCTION__;
     }
 
+    //!
+    //! \brief qprocess_finished
+    //! \param exitCode
+    //! \param exitStatus
+    //!
+    //! slots task in QProcess
     void qprocess_finished(int exitCode, QProcess::ExitStatus exitStatus)
     {
-        if(this->process==nullptr)
+        if(this->process==nullptr || !this->process->isOpen())
             return;
         Q_UNUSED(exitCode)
         Q_UNUSED(exitStatus)
-        qDebug()<<__PRETTY_FUNCTION__<<" "<<exitCode<<" "<<exitStatus;
     }
 
+    //!
+    //! \brief qprocess_errorOccurred
+    //!
+    //! slots task in QProcess
     void qprocess_errorOccurred(QProcess::ProcessError/* error*/)
     {
         this->onProcessTerminate();
     }
 
+    //!
+    //! \brief qprocess_readyReadStandardOutput
+    //!
+    //! slots task in QProcess
     void qprocess_readyReadStandardOutput()
     {
-        if(this->process==nullptr)
+        if(this->process==nullptr || !this->process->isOpen())
             return;
         auto lines=this->process->readAllStandardOutput().split('\n');
         for(auto&line:lines){
-            qDebug()<<line;
+            qInfo()<<line;
         }
     }
 
+    //!
+    //! \brief qprocess_readyReadStandardError
+    //! slots task in QProcess
     void qprocess_readyReadStandardError()
     {
-        if(this->process==nullptr)
+        if(this->process==nullptr || !this->process->isOpen())
             return;
         auto lines=this->process->readAllStandardError().split('\n');
         for(auto&line:lines){
-            qDebug()<<line;
+            qInfo()<<line;
         }
     }
 
 public slots:
+
+    //!
+    //! \brief onProcessStart
+    //! \param settings
+    //!
     void onProcessStart(const QVariantHash settings)
     {
         if(process==nullptr)
@@ -142,33 +167,42 @@ public slots:
         if(this->process==nullptr)
             return;
 
-        QProcess process;
+        if(!this->process->isOpen())
+            return;
 
         qint64 pid=this->process->processId();
 
-        if(pid<=0)
+        if(pid<=0){
+            qWarning()<<QStringLiteral("invalid pid for %1 %2").arg(this->process->program(), this->process->arguments().join(' '));
             return;
+        }
 
-        static const QStringList staticParams={"-h", "-r", "-u", "-v", "-p"};
+        static const QStringList staticParams={"-h", "-r", "-u", "-v", "-r", "1", "-p"};
 
-        QStringList params(staticParams);
-        params<<QString::number(pid);
+        auto params=QStringList(staticParams)<<QString::number(pid);
 
+        QProcess process;
         process.start(QStringLiteral("pidstat"), params);
         if(!process.waitForStarted(1000)){
             qWarning()<<process.readAllStandardError();
             return;
         }
 
-        if(!process.waitForFinished()){
-            qWarning()<<process.readAllStandardError();
-            process.terminate();
-            return;
+        QList<QByteArray> output;
+        if(!process.waitForFinished(3500)){
+            if(!process.isOpen()){
+                qWarning()<<process.readAllStandardError();
+            }
+            else{
+                output=process.readAllStandardOutput().trimmed().split('\n');
+                process.close();
+            }
+        }
+        else{
+            output=process.readAllStandardOutput().trimmed().split('\n');
         }
 
-        auto output=process.readAllStandardOutput().trimmed().split('\n');
-
-        if(output.size()<4)
+        if(output.size()<2)
             return;
 
         auto line1=output[output.length()-2].simplified().toLower().split(' ');
@@ -210,9 +244,6 @@ public slots:
 
     void onProcessTerminate()
     {
-        if(this->process!=nullptr)
-            process->terminate();
-
         if(this->isRunning()){
             emit processFinished();
             this->quit();

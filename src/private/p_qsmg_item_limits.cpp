@@ -110,7 +110,7 @@ bool ItemLimit::checkLimitExceeded(const QVariantHash &stats)
         }
 
         if(__return){
-            qWarning()<<QStringLiteral("limit exceeded in %1: %2 %3 %4").arg(this->name(), valueCheck.toString(), sCondition, valueLimit.toString());
+            qInfo()<<QStringLiteral("limit exceeded in %1: %2 %3 %4").arg(this->name(), valueCheck.toString(), sCondition, valueLimit.toString());
             break;
         }
     }

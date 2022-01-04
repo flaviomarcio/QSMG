@@ -53,9 +53,7 @@ Guardian &Guardian::start(const QByteArray &program, const QByteArray &arguments
 bool Guardian::isRunning()
 {
     dPvt();
-    if(p.process==nullptr)
-        return false;
-    return p.process->isRunning();
+    return p.isRunning();
 }
 
 Guardian &Guardian::waitFinished(unsigned long time)
@@ -75,6 +73,7 @@ Guardian &Guardian::terminate()
 {
     dPvt();
     p.taskStop();
+    p.wait();
     return*this;
 }
 

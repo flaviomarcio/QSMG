@@ -95,13 +95,13 @@ public slots:
         auto process=this->process;
         this->process=nullptr;
         if(process!=nullptr){
-            QObject::disconnect(this->process, &GuardianProcess::processStats, this, &GuardianPvt::onProcessStatsCheck);
-            QObject::disconnect(this->process, &GuardianProcess::processFinished, this, &GuardianPvt::onProcessFinished);
-            QObject::disconnect(this->process, &GuardianProcess::processStart, this->parent, &Guardian::processStart);
-            QObject::disconnect(this->process, &GuardianProcess::processStats, this->parent, &Guardian::processStats);
-            QObject::disconnect(this->process, &GuardianProcess::processFinished, this->parent, &Guardian::processFinished);
-            QObject::disconnect(this->process, &GuardianProcess::processStandardOutput, this->parent, &Guardian::processStandardOutput);
-            QObject::disconnect(this->process, &GuardianProcess::processStandardError, this->parent, &Guardian::processStandardError);
+            QObject::disconnect(process, &GuardianProcess::processStats, this, &GuardianPvt::onProcessStatsCheck);
+            QObject::disconnect(process, &GuardianProcess::processFinished, this, &GuardianPvt::onProcessFinished);
+            QObject::disconnect(process, &GuardianProcess::processStart, this->parent, &Guardian::processStart);
+            QObject::disconnect(process, &GuardianProcess::processStats, this->parent, &Guardian::processStats);
+            QObject::disconnect(process, &GuardianProcess::processFinished, this->parent, &Guardian::processFinished);
+            QObject::disconnect(process, &GuardianProcess::processStandardOutput, this->parent, &Guardian::processStandardOutput);
+            QObject::disconnect(process, &GuardianProcess::processStandardError, this->parent, &Guardian::processStandardError);
             process->quit();
             process->wait();
             process->deleteLater();

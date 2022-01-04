@@ -83,7 +83,7 @@ public:
     //!
     static QVariant getMemoryBytes(const QVariant&v, const QVariant&defaultV=QVariant())
     {
-        if(v.isNull() || !v.isValid() || v.toLongLong()<0)
+        if(v.isNull() || !v.isValid() || v.toDouble()<0)
             return defaultV;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -103,36 +103,34 @@ public:
         }
 
         qlonglong scale=1;
-        static qlonglong KB=1024;
         static qlonglong K=1024;
 
         auto a=getAlpha(v).toString().toLower();
         if(a==QStringLiteral("kb"))
             scale=1;
         else if(a==QStringLiteral("mb"))
-            scale=2;
+            scale=1000;
         else if(a==QStringLiteral("gb"))
-            scale=3;
+            scale=10000;
         else if(a==QStringLiteral("tb"))
-            scale=4;
+            scale=100000;
         else if(a==QStringLiteral("pb"))
-            scale=5;
+            scale=1000000;
         else if(a==QStringLiteral("eb"))
-            scale=6;
+            scale=10000000;
         else if(a==QStringLiteral("zb"))
-            scale=7;
+            scale=100000000;
         else if(a==QStringLiteral("yb"))
-            scale=8;
+            scale=1000000000;
         else
             scale=1;//ms
 
         auto iN=getNumber(v);
-        auto i=iN.toLongLong();
-        i*=KB*pow(K, scale);
+        auto i=iN.toDouble();
+        i*=(K*scale);
         if(i<=0)
-            i=getMemoryBytes(defaultV).toLongLong();
+            i=getMemoryBytes(defaultV).toULongLong();
         return i;
-        return 0;
     }
 
     //!
