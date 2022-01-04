@@ -9,6 +9,7 @@ namespace QSMG {
 
 class Q_SMG_GuardianTestUnit : public SDKGoogleTestUnit {
 public:
+    const QString tmpBashFile=QStringLiteral("/tmp/%1.sh").arg(qAppName());
     vh vLimitsCPU=vh{{"%cpu", vh{{"value","30%"},{"condition",">"}}}};
     vh vLimitsMem=vh{{"rss", vh{{"value","6gb"},{"condition",">"}}}};
     vh vLimitsRuning=vh{{"#time", vh{{"value","10s"},{"condition",">"}}}};
@@ -18,7 +19,7 @@ public:
 
     QString saveBash(const QStringList&lines)
     {
-        QFile file(QStringLiteral("/tmp/%1.sh").arg(qAppName()));
+        QFile file(this->tmpBashFile);
         if(file.exists())
             file.remove();
         if(file.open(QFile::WriteOnly | QFile::Truncate)){
@@ -48,51 +49,51 @@ public:
 
 };
 
-//TEST_F(Q_SMG_GuardianTestUnit, checkStartAndStop)
-//{
-//    Guardian guardian;
-//    auto bashFile=saveBash(sl{"#!/bin/bash","sleep 30"});
-//    auto settings=this->makeRunner(vh{{"program","/bin/bash"},{"arguments",bashFile}});
-//    settings["limits"]=QVariant();
-//    guardian.setSettings(settings);
-//    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
-//    guardian.start();
-//    EXPECT_TRUE(guardian.isRunning())<<"invalid state running";
-//    guardian.terminate();
-//    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
-//}
+TEST_F(Q_SMG_GuardianTestUnit, checkStartAndStop)
+{
+    Guardian guardian;
+    auto bashFile=saveBash(sl{"#!/bin/bash","sleep 30"});
+    auto settings=this->makeRunner(vh{{"program","/bin/bash"},{"arguments",bashFile}});
+    settings["limits"]=QVariant();
+    guardian.setSettings(settings);
+    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+    guardian.start();
+    EXPECT_TRUE(guardian.isRunning())<<"invalid state running";
+    guardian.terminate();
+    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+}
 
-//TEST_F(Q_SMG_GuardianTestUnit, checkLimitRuning)
-//{
-//    Guardian guardian;
-//    auto bashFile=saveBash(sl{"#!/bin/bash","sleep 60"});
-//    auto settings=this->makeRunner(vh{{"program","/bin/bash"},{"arguments",bashFile}});
-//    settings["limits"]=vLimitsRuning;
-//    guardian.setSettings(settings);
+TEST_F(Q_SMG_GuardianTestUnit, checkLimitRuning)
+{
+    Guardian guardian;
+    auto bashFile=saveBash(sl{"#!/bin/bash","sleep 60"});
+    auto settings=this->makeRunner(vh{{"program","/bin/bash"},{"arguments",bashFile}});
+    settings["limits"]=vLimitsRuning;
+    guardian.setSettings(settings);
 
-//    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
-//    guardian.start();
-//    EXPECT_TRUE(guardian.isRunning())<<"invalid state running";
-//    guardian.waitFinished();
-//    guardian.terminate();
-//    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
-//}
+    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+    guardian.start();
+    EXPECT_TRUE(guardian.isRunning())<<"invalid state running";
+    guardian.waitFinished();
+    guardian.terminate();
+    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+}
 
-//TEST_F(Q_SMG_GuardianTestUnit, checkLimitCPU)
-//{
-//    Guardian guardian;
-//    auto bashFile=saveBash(sl{"#!/bin/bash \n echo {1..100000000}"});
-//    auto settings=this->makeRunner(vh{{"program","/bin/bash"},{"arguments", bashFile}});
-//    settings["limits"]=vLimitsCPU;
-//    guardian.setSettings(settings);
+TEST_F(Q_SMG_GuardianTestUnit, checkLimitCPU)
+{
+    Guardian guardian;
+    auto bashFile=saveBash(sl{"#!/bin/bash \n echo {1..100000000}"});
+    auto settings=this->makeRunner(vh{{"program","/bin/bash"},{"arguments", bashFile}});
+    settings["limits"]=vLimitsCPU;
+    guardian.setSettings(settings);
 
-//    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
-//    guardian.start();
-//    EXPECT_TRUE(guardian.isRunning())<<"invalid state running";
-//    guardian.waitFinished();
-//    guardian.terminate();
-//    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
-//}
+    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+    guardian.start();
+    EXPECT_TRUE(guardian.isRunning())<<"invalid state running";
+    guardian.waitFinished();
+    guardian.terminate();
+    EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+}
 
 TEST_F(Q_SMG_GuardianTestUnit, checkLimitMemory)
 {
@@ -108,6 +109,14 @@ TEST_F(Q_SMG_GuardianTestUnit, checkLimitMemory)
     guardian.waitFinished();
     guardian.terminate();
     EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
+}
+
+
+TEST_F(Q_SMG_GuardianTestUnit, cleanup)
+{
+    QFile file(this->tmpBashFile);
+    if(file.exists())
+        file.remove();
 }
 
 }
