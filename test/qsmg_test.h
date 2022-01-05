@@ -11,6 +11,9 @@
 
 namespace QSMG {
 
+#define vh QVariantHash
+#define sl QStringList
+
 class SDKGoogleTest : public testing::Test{
 public:
 

@@ -16,4 +16,6 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/main.cpp \
-    $$PWD/qsmg_unit_test_guardian.cpp
+    $$PWD/qsmg_unit_test_guardian.cpp \
+    $$PWD/qsmg_unit_test_server.cpp \
+    $$PWD/qsmg_unit_test_client.cpp \

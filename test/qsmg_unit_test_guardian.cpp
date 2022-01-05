@@ -1,13 +1,13 @@
-#ifndef Q_SMG_GuardianTestUnit_H
-#define Q_SMG_GuardianTestUnit_H
+#ifndef Q_SMG_GuardianTestFunctional_H
+#define Q_SMG_GuardianTestFunctional_H
 
 #include <QFile>
-#include "./qsmg_test_unit.h"
+#include "./qsmg_test_functional.h"
 #include "../src/qsmg_guardian.h"
 
 namespace QSMG {
 
-class Q_SMG_GuardianTestUnit : public SDKGoogleTestUnit {
+class Q_SMG_GuardianTestFunctional : public SDKGoogleTestFunctional {
 public:
     const QString tmpBashFile=QStringLiteral("/tmp/%1.sh").arg(qAppName());
     vh vLimitsCPU=vh{{"%cpu", vh{{"value","30%"},{"condition",">"}}}};
@@ -49,7 +49,7 @@ public:
 
 };
 
-TEST_F(Q_SMG_GuardianTestUnit, checkStartAndStop)
+TEST_F(Q_SMG_GuardianTestFunctional, checkStartAndStop)
 {
     Guardian guardian;
     auto bashFile=saveBash(sl{"#!/bin/bash","sleep 30"});
@@ -63,7 +63,7 @@ TEST_F(Q_SMG_GuardianTestUnit, checkStartAndStop)
     EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
 }
 
-TEST_F(Q_SMG_GuardianTestUnit, checkLimitRuning)
+TEST_F(Q_SMG_GuardianTestFunctional, checkLimitRuning)
 {
     Guardian guardian;
     auto bashFile=saveBash(sl{"#!/bin/bash","sleep 60"});
@@ -79,7 +79,7 @@ TEST_F(Q_SMG_GuardianTestUnit, checkLimitRuning)
     EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
 }
 
-TEST_F(Q_SMG_GuardianTestUnit, checkLimitCPU)
+TEST_F(Q_SMG_GuardianTestFunctional, checkLimitCPU)
 {
     Guardian guardian;
     auto bashFile=saveBash(sl{"#!/bin/bash \n echo {1..100000000}"});
@@ -95,7 +95,7 @@ TEST_F(Q_SMG_GuardianTestUnit, checkLimitCPU)
     EXPECT_FALSE(guardian.isRunning())<<"invalid state running";
 }
 
-TEST_F(Q_SMG_GuardianTestUnit, checkLimitMemory)
+TEST_F(Q_SMG_GuardianTestFunctional, checkLimitMemory)
 {
     Guardian guardian;
     auto bashFile=saveBash(sl{"#!/bin/bash \n echo {1..100000000} > /dev/null"});
@@ -112,7 +112,7 @@ TEST_F(Q_SMG_GuardianTestUnit, checkLimitMemory)
 }
 
 
-TEST_F(Q_SMG_GuardianTestUnit, cleanup)
+TEST_F(Q_SMG_GuardianTestFunctional, cleanup)
 {
     QFile file(this->tmpBashFile);
     if(file.exists())
@@ -122,4 +122,4 @@ TEST_F(Q_SMG_GuardianTestUnit, cleanup)
 }
 
 
-#endif // GuardianTestUnit_H
+#endif // GuardianTestFunctional_H

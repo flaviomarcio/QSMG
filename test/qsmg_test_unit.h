@@ -4,15 +4,11 @@
 
 namespace QSMG {
 
-#define vh QVariantHash
-#define sl QStringList
-
 class SDKGoogleTestUnit : public SDKGoogleTest{
 public:
 
     explicit SDKGoogleTestUnit():SDKGoogleTest(){
     }
-
 public:
 };
 
