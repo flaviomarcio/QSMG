@@ -10,7 +10,6 @@
 #include <QTimer>
 #include <QMutex>
 #include <QDebug>
-#include <QRegExp>
 #include <math.h>
 
 namespace QSMG {

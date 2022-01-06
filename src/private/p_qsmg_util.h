@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QMutex>
 #include <QDebug>
-#include <QRegExp>
+#include <QVariant>
 #include <math.h>
 
 namespace QSMG {
